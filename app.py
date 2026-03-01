@@ -8,10 +8,10 @@ st.set_page_config(
     layout="wide"
 )
 
-# --- CSS ESTILO KABUM (PRETO E LARANJA) ---
+# --- CSS ESTILO KABUM (PRETO E LARANJA) COM ALTO CONTRASTE ---
 st.markdown("""
     <style>
-    @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700;900&display=swap');
 
     /* Fundo Escuro */
     .stApp {
@@ -23,10 +23,28 @@ st.markdown("""
     /* Título e Subtítulo */
     .header-box {
         text-align: center;
-        padding: 2rem 0;
+        padding: 2.5rem 0;
         background-color: #15191e;
-        border-bottom: 4px solid #ff6500; /* Laranja KaBuM */
+        border-bottom: 4px solid #ff6500;
         margin-bottom: 2rem;
+    }
+
+    /* AJUSTE DE CONTRASTE DOS FILTROS (SIDEBAR) */
+    /* Força o texto de labels e botões de rádio a ficar branco */
+    [data-testid="stSidebar"] p, 
+    [data-testid="stSidebar"] label, 
+    [data-testid="stSidebar"] span {
+        color: #ffffff !important;
+        font-weight: 700 !important;
+        font-size: 1rem !important;
+    }
+    
+    /* Cor do título da seção de filtros */
+    .filter-title {
+        color: #ff6500 !important;
+        font-weight: 900;
+        text-transform: uppercase;
+        margin-bottom: 15px;
     }
 
     /* Card de Produto Estilo Marketplace */
@@ -34,7 +52,7 @@ st.markdown("""
         background-color: #ffffff;
         border-radius: 8px;
         padding: 16px;
-        color: #333333; /* Texto escuro no card branco para leitura fácil */
+        color: #333333;
         text-align: left;
         min-height: 480px;
         display: flex;
@@ -44,7 +62,7 @@ st.markdown("""
     }
 
     .product-title {
-        font-size: 1rem;
+        font-size: 0.95rem;
         font-weight: 700;
         color: #42464d;
         height: 60px;
@@ -60,15 +78,15 @@ st.markdown("""
     }
 
     .price-new {
-        font-size: 1.6rem;
-        color: #ff6500; /* Laranja para destaque */
+        font-size: 1.8rem;
+        color: #ff6500;
         font-weight: 900;
         margin: 5px 0;
     }
 
     .price-installments {
         font-size: 0.85rem;
-        color: #7f858d;
+        color: #42464d;
     }
 
     /* Botão de Compra - ALTO CONTRASTE */
@@ -76,19 +94,19 @@ st.markdown("""
         background-color: #ff6500 !important;
         color: #ffffff !important;
         border: none !important;
-        font-weight: 700 !important;
+        font-weight: 900 !important;
         text-transform: uppercase;
         width: 100%;
         padding: 12px 0 !important;
         border-radius: 4px !important;
         font-size: 1.1rem !important;
         margin-top: 10px;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        box-shadow: 0 4px 6px rgba(0,0,0,0.3);
     }
 
     div.stButton > button:hover {
         background-color: #e55a00 !important;
-        color: #ffffff !important;
+        transform: scale(1.02);
     }
 
     /* Sidebar Escura */
@@ -116,8 +134,8 @@ products = load_data()
 # --- HEADER ---
 st.markdown("""
     <div class="header-box">
-        <h1 style="color: #ff6500; margin-bottom: 0;">MESTRE DA RAM</h1>
-        <p style="color: #94a3b8; letter-spacing: 2px;">BY GUSTAVO MENESES</p>
+        <h1 style="color: #ff6500; margin-bottom: 0; font-size: 3.5rem; font-weight: 900;">MESTRE DA RAM</h1>
+        <p style="color: #ffffff; letter-spacing: 4px; font-weight: 700;">CURADORIA TÉCNICA: GUSTAVO MENESES</p>
     </div>
     """, unsafe_allow_html=True)
 
@@ -125,21 +143,29 @@ st.markdown("""
 col_sidebar, col_main = st.columns([1, 4])
 
 with col_sidebar:
-    st.write("### FILTROS")
-    st.selectbox("Ordenar por:", ["Lançamentos", "Menor Preço", "Maior Preço"])
-    st.radio("Tecnologia:", ["Todas", "DDR4", "DDR5"])
+    st.markdown('<p class="filter-title">🔍 Filtros de Busca</p>', unsafe_allow_html=True)
+    
+    st.write("Ordenar por:")
+    st.selectbox("Selecione:", ["Lançamentos", "Menor Preço", "Maior Preço"], label_visibility="collapsed")
+    
+    st.markdown("<br>", unsafe_allow_html=True)
+    st.write("Tecnologia:")
+    tipo = st.radio("Escolha:", ["Todas", "DDR4", "DDR5"], label_visibility="collapsed")
+    
     st.divider()
-    st.write("✅ Produtos em Stock")
+    st.checkbox("Produtos em Stock", value=True)
 
 with col_main:
-    st.write("### 🔥 OFERTAS EM DESTAQUE")
+    st.markdown('<h2 style="color: #ffffff; margin-bottom: 20px;">🔥 OFERTAS EM DESTAQUE</h2>', unsafe_allow_html=True)
+    
+    # Lógica de filtro simples
+    filtered_products = products if tipo == "Todas" else [p for p in products if p['nome'].find(tipo) != -1]
     
     # Grid de 3 colunas
     cols = st.columns(3)
     
-    for i, p in enumerate(products):
+    for i, p in enumerate(filtered_products):
         with cols[i % 3]:
-            # Card HTML para estrutura
             st.markdown(f"""
                 <div class="product-card">
                     <img src="{p['img']}" style="width:100%; border-radius: 4px; height: 180px; object-fit: cover;">
@@ -147,22 +173,21 @@ with col_main:
                     <div>
                         <div class="price-old">€ {p['preco_de']:.2f}</div>
                         <div class="price-new">€ {p['preco']:.2f}</div>
-                        <div class="price-installments">À vista no PIX / Boleto</div>
-                        <div style="font-size: 0.8rem; color: #42464d;">ou € {(p['preco']*1.1)/10:.2f} em 10x sem juros</div>
+                        <div class="price-installments">No boleto ou PIX</div>
+                        <div style="font-size: 0.8rem; color: #ff6500; font-weight: 700;">ou 10x de € {(p['preco']*1.1)/10:.2f}</div>
                     </div>
                 </div>
             """, unsafe_allow_html=True)
             
-            # Botão Streamlit com estilo KaBuM
             if st.button(f"🛒 COMPRAR", key=f"btn_{p['id']}"):
-                st.toast(f"Adicionado: {p['nome']}")
+                st.toast(f"🛒 {p['nome']} adicionado ao carrinho!")
 
-# --- RODAPÉ SEO ---
+# --- RODAPÉ ---
 st.markdown("<br><br>", unsafe_allow_html=True)
 st.divider()
 st.markdown("""
-    <div style="text-align: center; color: #7f858d; padding: 20px;">
-        <h3>Por que comprar no Mestre da RAM?</h3>
-        <p>Gustavo Meneses seleciona pessoalmente cada pente de memória, garantindo compatibilidade e performance extrema para seu setup gamer.</p>
+    <div style="text-align: center; color: #ffffff; padding: 20px;">
+        <h3 style="color: #ff6500;">O Diferencial Mestre da RAM</h3>
+        <p style="max-width: 800px; margin: 0 auto;">Não vendemos apenas hardware. Gustavo Meneses analisa a latência, o barramento e a compatibilidade de cada módulo para que você tenha o máximo de FPS sem travamentos.</p>
     </div>
 """, unsafe_allow_html=True)
