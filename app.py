@@ -8,7 +8,7 @@ st.set_page_config(
     layout="wide"
 )
 
-# --- CSS ESTILO KABUM (PRETO E LARANJA) COM ALTO CONTRASTE ---
+# --- CSS ESTILO KABUM COM CONTRASTE TOTAL ---
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700;900&display=swap');
@@ -20,7 +20,7 @@ st.markdown("""
         font-family: 'Roboto', sans-serif;
     }
 
-    /* Título e Subtítulo */
+    /* Cabeçalho */
     .header-box {
         text-align: center;
         padding: 2.5rem 0;
@@ -29,25 +29,30 @@ st.markdown("""
         margin-bottom: 2rem;
     }
 
-    /* AJUSTE DE CONTRASTE DOS FILTROS (SIDEBAR) */
-    /* Força o texto de labels e botões de rádio a ficar branco */
-    [data-testid="stSidebar"] p, 
-    [data-testid="stSidebar"] label, 
-    [data-testid="stSidebar"] span {
-        color: #ffffff !important;
+    /* --- AJUSTE DEFINITIVO DOS FILTROS (BRANCO PURO) --- */
+    /* Alvo: Rótulos de Radio Buttons, Checkboxes e Textos da Sidebar */
+    [data-testid="stSidebar"] .st-at, 
+    [data-testid="stSidebar"] .st-ae, 
+    [data-testid="stSidebar"] .st-af,
+    [data-testid="stSidebar"] label p,
+    [data-testid="stSidebar"] div[data-testid="stMarkdownContainer"] p,
+    [data-testid="stSidebar"] span[data-testid="stWidgetLabel"] p {
+        color: #FFFFFF !important;
         font-weight: 700 !important;
-        font-size: 1rem !important;
+        opacity: 1 !important;
+        font-size: 1.05rem !important;
     }
-    
-    /* Cor do título da seção de filtros */
+
+    /* Título laranja dos Filtros */
     .filter-title {
         color: #ff6500 !important;
         font-weight: 900;
         text-transform: uppercase;
         margin-bottom: 15px;
+        font-size: 1.2rem;
     }
 
-    /* Card de Produto Estilo Marketplace */
+    /* Card de Produto */
     .product-card {
         background-color: #ffffff;
         border-radius: 8px;
@@ -70,13 +75,6 @@ st.markdown("""
         margin-top: 10px;
     }
 
-    .price-old {
-        font-size: 0.8rem;
-        color: #7f858d;
-        text-decoration: line-through;
-        margin-top: 15px;
-    }
-
     .price-new {
         font-size: 1.8rem;
         color: #ff6500;
@@ -84,12 +82,7 @@ st.markdown("""
         margin: 5px 0;
     }
 
-    .price-installments {
-        font-size: 0.85rem;
-        color: #42464d;
-    }
-
-    /* Botão de Compra - ALTO CONTRASTE */
+    /* Botão de Compra */
     div.stButton > button {
         background-color: #ff6500 !important;
         color: #ffffff !important;
@@ -99,23 +92,19 @@ st.markdown("""
         width: 100%;
         padding: 12px 0 !important;
         border-radius: 4px !important;
-        font-size: 1.1rem !important;
-        margin-top: 10px;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.3);
     }
 
     div.stButton > button:hover {
         background-color: #e55a00 !important;
-        transform: scale(1.02);
+        box-shadow: 0 0 15px rgba(255, 101, 0, 0.4);
     }
 
-    /* Sidebar Escura */
+    /* Sidebar */
     [data-testid="stSidebar"] {
         background-color: #15191e;
         border-right: 2px solid #ff6500;
     }
 
-    /* Esconder elementos nativos */
     header {visibility: hidden;}
     footer {visibility: hidden;}
     </style>
@@ -139,55 +128,43 @@ st.markdown("""
     </div>
     """, unsafe_allow_html=True)
 
-# --- CORPO DO SITE ---
+# --- CORPO ---
 col_sidebar, col_main = st.columns([1, 4])
 
 with col_sidebar:
-    st.markdown('<p class="filter-title">🔍 Filtros de Busca</p>', unsafe_allow_html=True)
+    st.markdown('<p class="filter-title">🔍 FILTROS</p>', unsafe_allow_html=True)
     
-    st.write("Ordenar por:")
-    st.selectbox("Selecione:", ["Lançamentos", "Menor Preço", "Maior Preço"], label_visibility="collapsed")
+    st.write("ORDENAR POR:")
+    st.selectbox("Ordenar:", ["Lançamentos", "Menor Preço", "Maior Preço"], label_visibility="collapsed")
     
     st.markdown("<br>", unsafe_allow_html=True)
-    st.write("Tecnologia:")
-    tipo = st.radio("Escolha:", ["Todas", "DDR4", "DDR5"], label_visibility="collapsed")
+    st.write("TECNOLOGIA:")
+    tipo = st.radio("Tecnologia:", ["Todas", "DDR4", "DDR5"], label_visibility="collapsed")
     
     st.divider()
-    st.checkbox("Produtos em Stock", value=True)
+    st.checkbox("PRODUTOS EM STOCK", value=True)
 
 with col_main:
     st.markdown('<h2 style="color: #ffffff; margin-bottom: 20px;">🔥 OFERTAS EM DESTAQUE</h2>', unsafe_allow_html=True)
     
-    # Lógica de filtro simples
-    filtered_products = products if tipo == "Todas" else [p for p in products if p['nome'].find(tipo) != -1]
-    
-    # Grid de 3 colunas
+    # Grid
     cols = st.columns(3)
-    
-    for i, p in enumerate(filtered_products):
+    for i, p in enumerate(products):
         with cols[i % 3]:
             st.markdown(f"""
                 <div class="product-card">
                     <img src="{p['img']}" style="width:100%; border-radius: 4px; height: 180px; object-fit: cover;">
                     <div class="product-title">{p['nome']}</div>
                     <div>
-                        <div class="price-old">€ {p['preco_de']:.2f}</div>
+                        <div style="font-size: 0.8rem; color: #7f858d; text-decoration: line-through;">€ {p['preco_de']:.2f}</div>
                         <div class="price-new">€ {p['preco']:.2f}</div>
-                        <div class="price-installments">No boleto ou PIX</div>
-                        <div style="font-size: 0.8rem; color: #ff6500; font-weight: 700;">ou 10x de € {(p['preco']*1.1)/10:.2f}</div>
+                        <div style="font-size: 0.85rem; color: #42464d;">À vista no Boleto ou PIX</div>
                     </div>
                 </div>
             """, unsafe_allow_html=True)
-            
             if st.button(f"🛒 COMPRAR", key=f"btn_{p['id']}"):
-                st.toast(f"🛒 {p['nome']} adicionado ao carrinho!")
+                st.toast(f"Adicionado ao carrinho!")
 
 # --- RODAPÉ ---
-st.markdown("<br><br>", unsafe_allow_html=True)
-st.divider()
-st.markdown("""
-    <div style="text-align: center; color: #ffffff; padding: 20px;">
-        <h3 style="color: #ff6500;">O Diferencial Mestre da RAM</h3>
-        <p style="max-width: 800px; margin: 0 auto;">Não vendemos apenas hardware. Gustavo Meneses analisa a latência, o barramento e a compatibilidade de cada módulo para que você tenha o máximo de FPS sem travamentos.</p>
-    </div>
-""", unsafe_allow_html=True)
+st.markdown("<br><br><hr>", unsafe_allow_html=True)
+st.markdown('<div style="text-align: center; color: white;">Mestre da RAM © 2026 - Gustavo Meneses</div>', unsafe_allow_html=True)
