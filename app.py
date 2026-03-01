@@ -1,177 +1,170 @@
 import streamlit as st
 import pandas as pd
 
-# 1. CONFIGURAÇÃO DE SEO E IDENTIDADE
+# 1. CONFIGURAÇÃO DE SEO
 st.set_page_config(
-    page_title="Mestre da RAM | Upgrade por Gustavo Meneses",
+    page_title="Mestre da RAM | Gustavo Meneses",
     page_icon="🧠",
     layout="wide"
 )
 
-# --- CSS CUSTOMIZADO (O "BANHO DE LOJA") ---
+# --- CSS AVANÇADO PARA LIMPEZA DE LAYOUT ---
 st.markdown("""
     <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;700&display=swap');
 
-    /* Fundo e Fonte Global */
+    /* Reset de fundo */
     .stApp {
-        background: radial-gradient(circle at top, #0d1117 0%, #010409 100%);
-        font-family: 'Inter', sans-serif;
-        color: #c9d1d9;
+        background-color: #05070a;
+        color: #e0e6ed;
+        font-family: 'Rajdhani', sans-serif;
     }
 
-    /* Estilo do Título Principal */
-    .main-title {
-        font-size: 3.5rem !important;
-        font-weight: 900 !important;
-        background: linear-gradient(90deg, #00d4ff, #005fad);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        margin-bottom: 0px !important;
+    /* Bloco de Título Isolado */
+    .header-container {
         text-align: center;
+        padding: 40px 0px;
+        background: linear-gradient(180deg, #0d1117 0%, #05070a 100%);
+        border-bottom: 1px solid #1f2937;
+        margin-bottom: 30px;
+    }
+
+    .main-title {
+        font-size: 4rem !important;
+        letter-spacing: 2px;
+        font-weight: 700;
+        color: #00d4ff;
+        text-shadow: 0px 0px 15px rgba(0, 212, 255, 0.3);
+        margin: 0;
     }
 
     .sub-title {
-        text-align: center;
-        color: #8b949e;
+        color: #94a3b8;
         font-size: 1.2rem;
-        margin-bottom: 40px;
+        text-transform: uppercase;
+        letter-spacing: 4px;
     }
 
-    /* Card do Produto */
-    .product-card {
-        background: rgba(22, 27, 34, 0.8);
-        border: 1px solid #30363d;
-        border-radius: 16px;
+    /* Container do Catálogo */
+    .catalog-container {
         padding: 20px;
-        transition: all 0.3s ease;
-        text-align: center;
-        height: 100%;
+    }
+
+    /* Card do Produto Estilizado */
+    .product-card {
+        background: #0d1117;
+        border: 1px solid #1f2937;
+        border-radius: 12px;
+        padding: 15px;
+        transition: 0.3s;
+        min-height: 450px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
     }
 
     .product-card:hover {
-        border-color: #58a6ff;
-        transform: translateY(-8px);
-        box-shadow: 0 10px 30px rgba(0, 212, 255, 0.15);
+        border-color: #00d4ff;
+        box-shadow: 0px 0px 20px rgba(0, 212, 255, 0.1);
     }
 
-    /* Imagem do Produto */
-    .product-img {
-        border-radius: 12px;
-        margin-bottom: 15px;
-        border: 1px solid #21262d;
+    .product-name {
+        color: #ffffff;
+        font-size: 1.4rem;
+        margin: 15px 0 5px 0;
+        height: 60px; /* Garante alinhamento */
+        overflow: hidden;
     }
 
-    /* Botão de Compra */
-    div.stButton > button {
-        background: linear-gradient(135deg, #1f6feb 0%, #00d4ff 100%);
-        color: white;
-        border: none;
-        padding: 12px 24px;
-        border-radius: 10px;
+    .product-price {
+        color: #00d4ff;
+        font-size: 1.8rem;
         font-weight: bold;
+        margin-bottom: 15px;
+    }
+
+    /* Ajuste de Botões Streamlit */
+    div.stButton > button {
         width: 100%;
-        transition: 0.3s;
+        border-radius: 8px;
+        background: transparent;
+        border: 1px solid #00d4ff;
+        color: #00d4ff;
+        font-weight: bold;
     }
 
     div.stButton > button:hover {
-        box-shadow: 0 0 15px rgba(31, 111, 235, 0.6);
-        transform: scale(1.02);
+        background: #00d4ff;
+        color: #05070a;
     }
 
-    /* Sidebar Estilizada */
-    section[data-testid="stSidebar"] {
-        background-color: #0d1117 !important;
-        border-right: 1px solid #30363d;
-    }
-
-    /* Abas (Tabs) */
-    .stTabs [data-baseweb="tab-list"] {
-        gap: 20px;
-        justify-content: center;
-    }
-
-    .stTabs [data-baseweb="tab"] {
-        background-color: transparent !important;
-        border-radius: 4px;
-        color: #8b949e !important;
-    }
-
-    .stTabs [aria-selected="true"] {
-        color: #58a6ff !important;
-        border-bottom: 2px solid #58a6ff !important;
-    }
+    /* Esconder elementos desnecessários */
+    #MainMenu {visibility: hidden;}
+    footer {visibility: hidden;}
+    header {visibility: hidden;}
     </style>
     """, unsafe_allow_html=True)
 
-# 2. BASE DE DADOS SIMULADA
-def load_products():
-    data = [
-        {"id": 1, "nome": "Mestre DDR4 16GB 3200Mhz", "preco": 52.90, "tipo": "DDR4", "link": "#", "img": "https://images.unsplash.com/photo-1562976540-1502c2145186?auto=format&fit=crop&q=80&w=400"},
-        {"id": 2, "nome": "Mestre DDR5 32GB 5600Mhz", "preco": 129.90, "tipo": "DDR5", "link": "#", "img": "https://images.unsplash.com/photo-1591405351990-4726e331f141?auto=format&fit=crop&q=80&w=400"},
-        {"id": 3, "nome": "Kit RGB Dual Channel 16GB", "preco": 79.00, "tipo": "DDR4", "link": "#", "img": "https://images.unsplash.com/photo-1544099858-75feeb57f0ce?auto=format&fit=crop&q=80&w=400"},
+# 2. DADOS DOS PRODUTOS
+def get_data():
+    return [
+        {"id": 1, "nome": "RAM Mestre DDR4 16GB 3200Mhz", "preco": 52.90, "tipo": "DDR4", "img": "https://images.unsplash.com/photo-1562976540-1502c2145186?w=400"},
+        {"id": 2, "nome": "RAM Mestre DDR5 32GB 5600Mhz", "preco": 129.90, "tipo": "DDR5", "img": "https://images.unsplash.com/photo-1591405351990-4726e331f141?w=400"},
+        {"id": 3, "nome": "Kit RGB Dual Channel 16GB", "preco": 79.00, "tipo": "DDR4", "img": "https://images.unsplash.com/photo-1544099858-75feeb57f0ce?w=400"},
     ]
-    return pd.DataFrame(data)
 
-df = load_products()
+products = get_data()
 
-if 'cart' not in st.session_state:
-    st.session_state.cart = []
+# --- LAYOUT DO TOPO (HEADER ISOLADO) ---
+st.markdown(f"""
+    <div class="header-container">
+        <p class="sub-title">Consultoria Técnica</p>
+        <h1 class="main-title">MESTRE DA RAM</h1>
+        <p style="color: #4ade80; margin-top: 10px;">Curadoria por Gustavo Meneses</p>
+    </div>
+    """, unsafe_allow_html=True)
 
-# --- HEADER PRINCIPAL ---
-st.markdown('<h1 class="main-title">🧠 MESTRE DA RAM</h1>', unsafe_allow_html=True)
-st.markdown('<p class="sub-title">Alta performance e curadoria técnica por Gustavo Meneses</p>', unsafe_allow_html=True)
+# --- NAVEGAÇÃO E FILTROS ---
+tab_loja, tab_blog, tab_contato = st.tabs(["🛒 CATÁLOGO", "📖 ARTIGOS", "🛠️ SUPORTE"])
 
-# --- NAVEGAÇÃO ---
-menu = st.tabs(["🛒 Showroom", "📖 Artigos do Mestre", "🛠️ Consultoria"])
-
-with menu[0]:
-    # Filtro Centralizado
-    c1, c2, c3 = st.columns([1, 2, 1])
-    with c2:
-        categoria = st.segmented_control("Filtrar por tecnologia:", ["Todas", "DDR4", "DDR5"], default="Todas", label_visibility="collapsed")
+with tab_loja:
+    # Filtro centralizado e discreto
+    col_f1, col_f2, col_f3 = st.columns([1, 1, 1])
+    with col_f2:
+        filtro = st.radio("Selecione a Tecnologia:", ["Todas", "DDR4", "DDR5"], horizontal=True, label_visibility="collapsed")
     
     st.markdown("<br>", unsafe_allow_html=True)
-    
-    df_filtered = df if categoria == "Todas" else df[df['tipo'] == categoria]
-    
+
     # Grid de Produtos
     cols = st.columns(3)
-    for i, row in enumerate(df_filtered.itertuples()):
-        with cols[i % 3]:
-            st.markdown(f"""
-                <div class="product-card">
-                    <img src="{row.img}" class="product-img" width="100%">
-                    <h3 style="margin: 10px 0;">{row.nome}</h3>
-                    <p style="color: #58a6ff; font-size: 1.4rem; font-weight: bold;">{row.preco:.2f}€</p>
-                </div>
-            """, unsafe_allow_html=True)
-            
-            # Botões (fora do markdown para manter funcionalidade)
-            st.button(f"🚀 Comprar Agora", key=f"buy_{row.id}")
-            if st.button(f"📥 Adicionar ao Carrinho", key=f"add_{row.id}"):
-                st.session_state.cart.append({"nome": row.nome, "preco": row.preco})
-                st.toast(f"{row.nome} adicionado!")
+    
+    for i, p in enumerate(products):
+        if filtro == "Todas" or p['tipo'] == filtro:
+            with cols[i % 3]:
+                # Card visual via HTML para controle total do design
+                st.markdown(f"""
+                    <div class="product-card">
+                        <img src="{p['img']}" style="width:100%; border-radius: 8px; height: 180px; object-fit: cover;">
+                        <div class="product-name">{p['nome']}</div>
+                        <div class="product-price">{p['preco']:.2f}€</div>
+                    </div>
+                """, unsafe_allow_html=True)
+                
+                # Botão funcional do Streamlit logo abaixo do card
+                if st.button(f"Comprar {p['id']}", key=f"btn_{p['id']}", help="Clique para iniciar a compra"):
+                    st.toast(f"A processar pedido de: {p['nome']}")
 
-with menu[1]:
-    st.header("📖 Blog de Performance")
-    st.info("Aqui entram seus artigos para SEO orgânico. O Google adora este conteúdo!")
+with tab_blog:
+    st.markdown("### 📚 Espaço de Conhecimento")
+    st.write("Em breve, conteúdos exclusivos para SEO orgânico.")
 
-with menu[2]:
-    st.header("🛠️ Suporte Direto")
-    st.write("Fale com o Gustavo para tirar dúvidas técnicas.")
+with tab_contato:
+    st.markdown("### 📞 Fale com o Mestre")
+    st.write("Dúvidas sobre compatibilidade com o Gustavo Meneses.")
 
-# --- SIDEBAR ---
+# --- SIDEBAR LIMPA ---
 with st.sidebar:
-    st.markdown("### 🛍️ Minha Seleção")
-    if st.session_state.cart:
-        for item in st.session_state.cart:
-            st.write(f"🔹 {item['nome']} - {item['preco']}€")
-        total = sum(i['preco'] for i in st.session_state.cart)
-        st.divider()
-        st.markdown(f"### Total: {total:.2f}€")
-        if st.button("Finalizar Pedido"):
-            st.balloons()
-            st.success("Redirecionando...")
-    else:
-        st.write("Carrinho vazio.")
+    st.markdown("### 🛒 SEU CARRINHO")
+    st.write("O seu carrinho está vazio.")
+    st.divider()
+    st.caption("Mestre da RAM © 2026")
